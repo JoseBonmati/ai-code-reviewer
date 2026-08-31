@@ -6,7 +6,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 
 ## Project Structure
 
-- `main.py`: The main CLI entry point. Initializes the execution state, reads dynamic file arguments from the terminal, and triggers the LangGraph orchestration.
+- `main.py`: The main orchestrator entry point. Initializes the execution state and automatically scans the `data/` directory to trigger the LangGraph pipeline for all valid Python files in batch.
 - `agent/`: Contains the core LangGraph architecture and LLM interactions.
   - `graph.py`: Constructs and compiles the `StateGraph`, defining the data flow and execution pipeline for the review process.
   - `nodes.py`: Houses the core logic, including the robust `clean_think_tag` Regex parser, dynamic prompt construction, and the primary `analyze_code_node`.
@@ -24,7 +24,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **LangGraph Orchestration**: Utilizes a highly scalable `StateGraph` dictionary (`ReviewState`) to manage code context and AI outputs, ensuring the workflow can easily expand into a complex multi-agent system.
 - **Dual Validation Architecture**: Elevates the review process from passive LLM inference to active system validation. The workflow executes physical static analysis tools (`flake8`, `bandit`) in the background, intercepting OS-level terminal errors (e.g., syntax violations, SQL injections) and injecting them into the LLM's prompt for factual, hallucination-free grounding.
 - **Focused Diagnostic Categories**: The system prompt strictly forces the LLM to categorize its feedback into three distinct, actionable sections: Bugs/Security Vulnerabilities, Performance Optimizations, and Readability/Cleanliness.
-- **CLI-Driven Dynamic Execution**: The `main.py` script utilizes the `sys` module to accept dynamic file paths directly from the terminal, enabling rapid testing across multiple files.
+- **Secure Backend Directory Scanning**: The orchestrator is strictly locked to scan the `data/` directory. This secure constraint prepares the architecture for seamless frontend integration, ensuring only safely uploaded files are processed in batch.
 - **Automated Markdown Export**: The LangGraph pipeline features a dedicated final node that automatically captures the LLM's structured feedback and exports it as a timestamped Markdown file in the `reports/` directory for seamless documentation and PR integration.
 
 ## Running the Use Case
@@ -36,8 +36,8 @@ The AI Code Reviewer is executed via the command-line interface. To run your fir
    pip install -r requirements.txt
    ```
 2. Duplicate .env.example to .env and configure your LLM provider credentials.
-3. Place the file you want to review inside the data/ directory (or specify any valid path).
-4. Execute the orchestrator from the root directory, passing the target file as an argument:
+3. Place all the Python files you want to review inside the `data/` directory.
+4. Execute the orchestrator from the root directory to scan all files inside `data/`:
    ```bash
-   python main.py data/sample.py
+   python main.py
    ```
