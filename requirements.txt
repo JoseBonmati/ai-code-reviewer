@@ -1,4 +1,11 @@
+# LLM & Orchestration Framework
 langchain-core
 langchain-openai
 langgraph
+
+# Environment & Configuration
 python-dotenv
+
+# Static Analysis & Linters
+flake8
+bandit

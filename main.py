@@ -25,6 +25,8 @@ def main():
     initial_state = {
         "file_path": file_path,
         "code_content": code_content,
+        "linter_output": None,
+        "security_output": None,
         "review_output": None
     }
     
