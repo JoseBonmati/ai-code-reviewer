@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, START, END
-from agent.nodes import ReviewState, analyze_code_node, execute_tools_node
+from agent.nodes import ReviewState, analyze_code_node, execute_tools_node, save_report_node
 
 def build_graph():
     """Constructs and compiles the AI Code Reviewer LangGraph workflow."""
@@ -8,11 +8,13 @@ def build_graph():
     # Add execution nodes
     workflow.add_node("execute_tools", execute_tools_node)
     workflow.add_node("analyze_code", analyze_code_node)
+    workflow.add_node("save_report", save_report_node)
     
     # Define sequential execution flow
     workflow.add_edge(START, "execute_tools")
     workflow.add_edge("execute_tools", "analyze_code")
-    workflow.add_edge("analyze_code", END)
+    workflow.add_edge("analyze_code", "save_report")
+    workflow.add_edge("save_report", END)
     
     # Compile execution pipeline
     return workflow.compile()

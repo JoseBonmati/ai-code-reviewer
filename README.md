@@ -12,6 +12,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
   - `nodes.py`: Houses the core logic, including the robust `clean_think_tag` Regex parser, dynamic prompt construction, and the primary `analyze_code_node`.
   - `tools.py`: Integrates native `subprocess` execution for physical system tools (`flake8` for syntax styling and `bandit` for AST-based security scanning).
 - `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
+- `reports/`: Automatically generated directory where the system saves timestamped Markdown (`.md`) review reports.
 - `.env.example`: Configuration file isolating API keys, endpoints, and model selection from the source code.
 - `requirements.txt`: Defines project dependencies including orchestration frameworks and physical static analyzers.
 - `Dockerfile` & `docker-compose.yaml`: Infrastructure files to containerize the agent environment.
@@ -24,6 +25,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Dual Validation Architecture**: Elevates the review process from passive LLM inference to active system validation. The workflow executes physical static analysis tools (`flake8`, `bandit`) in the background, intercepting OS-level terminal errors (e.g., syntax violations, SQL injections) and injecting them into the LLM's prompt for factual, hallucination-free grounding.
 - **Focused Diagnostic Categories**: The system prompt strictly forces the LLM to categorize its feedback into three distinct, actionable sections: Bugs/Security Vulnerabilities, Performance Optimizations, and Readability/Cleanliness.
 - **CLI-Driven Dynamic Execution**: The `main.py` script utilizes the `sys` module to accept dynamic file paths directly from the terminal, enabling rapid testing across multiple files.
+- **Automated Markdown Export**: The LangGraph pipeline features a dedicated final node that automatically captures the LLM's structured feedback and exports it as a timestamped Markdown file in the `reports/` directory for seamless documentation and PR integration.
 
 ## Running the Use Case
 
