@@ -1,18 +1,46 @@
 import os
-import sys
+import shutil
+import uvicorn
+from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from agent.graph import graph
 
-def process_file(file_path: str):
-    """Reads a file and triggers the LangGraph review pipeline."""
-    print(f"\nReading code from: {file_path}...")
+app = FastAPI(title="AI Code Reviewer API", version="2.0")
+
+# Allow requests from the React frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+DATA_DIR = "data"
+
+@app.post("/api/review")
+async def review_code(file: UploadFile = File(...)):
+    if not file.filename.endswith(".py"):
+        raise HTTPException(status_code=400, detail="Only .py files are supported.")
+    
+    # Ensure the data/ directory exists and save the uploaded file
+    os.makedirs(DATA_DIR, exist_ok=True)
+    file_path = os.path.join(DATA_DIR, file.filename)
+    
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving file: {e}")
+
+    # Read the content for the AI
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             code_content = f.read()
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
-        return
+        raise HTTPException(status_code=500, detail=f"Error reading file: {e}")
 
-    # Prepare the initial state dictionary
+    # Prepare the initial state and trigger LangGraph
     initial_state = {
         "file_path": file_path,
         "code_content": code_content,
@@ -22,41 +50,17 @@ def process_file(file_path: str):
         "report_path": None
     }
     
-    print(f"The agent is analyzing '{os.path.basename(file_path)}'. Please wait...")
-    
     try:
-        # Trigger the LangGraph execution
         result = graph.invoke(initial_state)
-        
-        if "report_path" in result:
-            print(f"Report successfully saved to: {result['report_path']}")
-            
+        return {
+            "status": "success",
+            "file_analyzed": file.filename,
+            "report_path": result.get("report_path"),
+            "review": result.get("review_output", "No review generated.")
+        }
     except Exception as e:
-        print(f"Error during execution for {file_path}: {e}")
-
-def main():
-    target_path = "data/"
-    
-    print("Initializing AI Code Reviewer...")
-    
-    # Check if the directory exists
-    if not os.path.exists(target_path):
-        print(f"Error: Directory '{target_path}' not found.")
-        sys.exit(1)
-        
-    print(f"Scanning secure directory: {target_path}")
-    
-    files_processed = 0
-    # Recursively find and process all .py files
-    for root, dirs, files in os.walk(target_path):
-        for file in files:
-            if file.endswith(".py"):
-                full_path = os.path.join(root, file)
-                process_file(full_path)
-                files_processed += 1
-                
-    if files_processed == 0:
-        print(f"No Python files found in '{target_path}'.")
+        raise HTTPException(status_code=500, detail=f"AI Agent execution error: {e}")
 
 if __name__ == "__main__":
-    main()
+    print("Starting AI Code Reviewer Backend on http://localhost:8000")
+    uvicorn.run(app, host="0.0.0.0", port=8000)

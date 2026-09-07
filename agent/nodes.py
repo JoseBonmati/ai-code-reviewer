@@ -18,7 +18,7 @@ load_dotenv()
 
 api_key = os.getenv("API_KEY")
 base_url = os.getenv("LLM_ENDPOINT", "https://api.groq.com/openai/v1")
-model_name = os.getenv("LLM_MODEL", "qwen/qwen3.6-27b")
+model_name = os.getenv("LLM_MODEL", "qwen/qwen3.8-27b")
 
 llm = ChatOpenAI(
     api_key=api_key,

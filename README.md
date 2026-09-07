@@ -1,17 +1,18 @@
 # AI-Powered Code Reviewer
 
-This project implements a modular, AI Code Reviewer using Python, LangChain, and LangGraph. It provides an automated pipeline that analyzes source code files and generates highly structured, actionable feedback focused on security, performance, and maintainability.
+This project implements a modular, full-stack AI Code Reviewer using Python, FastAPI, LangGraph, and a React/Vite frontend. It provides an automated pipeline that analyzes source code files and generates highly structured, actionable feedback focused on security, performance, and maintainability.
 
 The architecture is intentionally agnostic, allowing developers to seamlessly swap LLM providers (e.g., Groq, OpenAI, Azure, or local models via LM Studio) strictly through environment variables without modifying the core logic. It also features robust regex-based output parsing to support advanced reasoning models (like Qwen or DeepSeek) by silently filtering their internal "Chain of Thought" mechanisms.
 
 ## Project Structure
 
-- `main.py`: The main orchestrator entry point. Initializes the execution state and automatically scans the `data/` directory to trigger the LangGraph pipeline for all valid Python files in batch.
+- `main.py`: The FastAPI application entry point. Exposes the `/api/review` endpoint to process file uploads and trigger the LangGraph pipeline.
 - `agent/`: Contains the core LangGraph architecture and LLM interactions.
   - `graph.py`: Constructs and compiles the `StateGraph`, defining the data flow and execution pipeline for the review process.
   - `nodes.py`: Houses the core logic, including the robust `clean_think_tag` Regex parser, dynamic prompt construction, and the primary `analyze_code_node`.
   - `tools.py`: Integrates native `subprocess` execution for physical system tools (`flake8` for syntax styling and `bandit` for AST-based security scanning).
 - `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
+- `frontend/`: Contains the React and Vite client application, including custom CSS and a multi-stage Dockerfile for Nginx deployment.
 - `reports/`: Automatically generated directory where the system saves timestamped Markdown (`.md`) review reports.
 - `.env.example`: Configuration file isolating API keys, endpoints, and model selection from the source code.
 - `requirements.txt`: Defines project dependencies including orchestration frameworks and physical static analyzers.
@@ -26,18 +27,22 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Focused Diagnostic Categories**: The system prompt strictly forces the LLM to categorize its feedback into three distinct, actionable sections: Bugs/Security Vulnerabilities, Performance Optimizations, and Readability/Cleanliness.
 - **Secure Backend Directory Scanning**: The orchestrator is strictly locked to scan the `data/` directory. This secure constraint prepares the architecture for seamless frontend integration, ensuring only safely uploaded files are processed in batch.
 - **Automated Markdown Export**: The LangGraph pipeline features a dedicated final node that automatically captures the LLM's structured feedback and exports it as a timestamped Markdown file in the `reports/` directory for seamless documentation and PR integration.
+- **Full-Stack Interface**: Includes a modern, responsive React web client to upload files and visualize the generated Markdown reports.
+- **Production-Ready Infrastructure**: Fully containerized using Docker and Docker Compose with multi-stage builds, separating the backend (Uvicorn) and frontend (Nginx) services.
 
-## Running the Use Case
+## Running the Application
 
-The AI Code Reviewer is executed via the command-line interface. To run your first code review:
+The AI Code Reviewer is fully containerized. To launch the system:
 
 1. Install the required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 2. Duplicate .env.example to .env and configure your LLM provider credentials.
-3. Place all the Python files you want to review inside the `data/` directory.
-4. Execute the orchestrator from the root directory to scan all files inside `data/`:
+3. Build and launch the multi-container infrastructure:
    ```bash
-   python main.py
+   docker compose up --build
    ```
+4. Access the application:
+   Web Interface: http://localhost:3000
+   API Documentation (Swagger): http://localhost:8000/docs

@@ -9,3 +9,8 @@ python-dotenv
 # Static Analysis & Linters
 flake8
 bandit
+
+# API & Web Server
+fastapi
+uvicorn
+python-multipart
