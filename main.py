@@ -5,7 +5,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from agent.graph import graph
 
-app = FastAPI(title="AI Code Reviewer API", version="2.0")
+app = FastAPI(title="AI Code Reviewer API", version="3.0")
 
 # Allow requests from the React frontend
 app.add_middleware(

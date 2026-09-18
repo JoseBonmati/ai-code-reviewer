@@ -1,0 +1,19 @@
+.download-button {
+  margin-top: 24px;
+  width: 100%;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #8b5cf6;
+  border: 2px solid #8b5cf6;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-button:hover {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #a78bfa;
+  border-color: #a78bfa;
+}

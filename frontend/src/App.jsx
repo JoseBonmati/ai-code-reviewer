@@ -1,18 +1,17 @@
 import { useState } from 'react'
+import FileUploadZone from './components/FileUploadZone'
+import ReportViewer from './components/ReportViewer'
+import DownloadButton from './components/DownloadButton'
 import './App.css'
 
 function App() {
+  // Global application states
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0])
-    setResult(null)
-    setError(null)
-  }
-
+  // Send the file to the FastAPI backend
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!file) return
@@ -48,11 +47,13 @@ function App() {
       <p className="app-description">Upload a Python (.py) file for the agent to analyze.</p>
 
       <form onSubmit={handleSubmit} className="upload-form">
-        <input 
-          type="file" 
-          accept=".py" 
-          onChange={handleFileChange} 
+        <FileUploadZone 
+          file={file} 
+          setFile={setFile} 
+          setError={setError} 
+          setResult={setResult}
         />
+        
         <button type="submit" className="submit-button" disabled={!file || loading}>
           {loading ? 'Analyzing...' : 'Analyze Code'}
         </button>
@@ -66,9 +67,10 @@ function App() {
           <p><strong>File:</strong> {result.file_analyzed}</p>
           <p><strong>Report path:</strong> {result.report_path}</p>
           <hr />
-          <pre className="report-content">
-            {result.review}
-          </pre>
+          
+          <ReportViewer reviewText={result.review} />
+          
+          <DownloadButton result={result} />
         </div>
       )}
     </div>

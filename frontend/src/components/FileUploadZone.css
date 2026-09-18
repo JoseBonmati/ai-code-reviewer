@@ -1,0 +1,26 @@
+.drop-zone {
+  border: 2px dashed #444;
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: #252525;
+  margin-bottom: 0;
+}
+
+.drop-zone:hover {
+  background-color: #2a2a2a;
+}
+
+.drop-zone.dragging {
+  border-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.drop-zone p {
+  margin: 0;
+  color: #888;
+  font-weight: 500;
+  font-size: 1.1rem;
+}

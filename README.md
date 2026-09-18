@@ -12,7 +12,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
   - `nodes.py`: Houses the core logic, including the robust `clean_think_tag` Regex parser, dynamic prompt construction, and the primary `analyze_code_node`.
   - `tools.py`: Integrates native `subprocess` execution for physical system tools (`flake8` for syntax styling and `bandit` for AST-based security scanning).
 - `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
-- `frontend/`: Contains the React and Vite client application, including custom CSS and a multi-stage Dockerfile for Nginx deployment.
+- `frontend/`: The React and Vite client application. Features a modular, component-based architecture. Includes a multi-stage Dockerfile for Nginx deployment.
 - `reports/`: Automatically generated directory where the system saves timestamped Markdown (`.md`) review reports.
 - `.env.example`: Configuration file isolating API keys, endpoints, and model selection from the source code.
 - `requirements.txt`: Defines project dependencies including orchestration frameworks and physical static analyzers.
@@ -27,7 +27,9 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Focused Diagnostic Categories**: The system prompt strictly forces the LLM to categorize its feedback into three distinct, actionable sections: Bugs/Security Vulnerabilities, Performance Optimizations, and Readability/Cleanliness.
 - **Secure Backend Directory Scanning**: The orchestrator is strictly locked to scan the `data/` directory. This secure constraint prepares the architecture for seamless frontend integration, ensuring only safely uploaded files are processed in batch.
 - **Automated Markdown Export**: The LangGraph pipeline features a dedicated final node that automatically captures the LLM's structured feedback and exports it as a timestamped Markdown file in the `reports/` directory for seamless documentation and PR integration.
-- **Full-Stack Interface**: Includes a modern, responsive React web client to upload files and visualize the generated Markdown reports.
+- **Full-Stack Interface**: A responsive, dark-themed React web client featuring an interactive Drag & Drop upload zone. Built with a modular component architecture following strict React best practices (Single Responsibility Principle).
+- **Live Markdown & Syntax Highlighting**: Intercepts the LLM's raw markdown output and securely renders it into formatted HTML using `react-markdown`, applying a native VS Code dark theme to code blocks and snippets via `react-syntax-highlighter`.
+- **Client-Side Export**: Incorporates seamless, memory-efficient browser-based downloading. Users can export the generated analysis directly to their local machine as a formatted `.md` file using the native JavaScript Blob API.
 - **Production-Ready Infrastructure**: Fully containerized using Docker and Docker Compose with multi-stage builds, separating the backend (Uvicorn) and frontend (Nginx) services.
 
 ## Running the Application
