@@ -6,7 +6,7 @@ body {
 }
 
 .app-container {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 40px auto;
   font-family: system-ui, -apple-system, sans-serif;
   padding: 20px;

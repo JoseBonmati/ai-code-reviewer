@@ -6,10 +6,11 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 
 ## Project Structure
 
-- `main.py`: The FastAPI application entry point. Exposes the `/api/review` endpoint to process file uploads and trigger the LangGraph pipeline.
+- `main.py`: The FastAPI application entry point. Exposes the `/api/review` and `/api/refactor` endpoints, managing unique `thread_id` sessions for asynchronous agent execution.
 - `agent/`: Contains the core LangGraph architecture and LLM interactions.
-  - `graph.py`: Constructs and compiles the `StateGraph`, defining the data flow and execution pipeline for the review process.
-  - `nodes.py`: Houses the core logic, including the robust `clean_think_tag` Regex parser, dynamic prompt construction, and the primary `analyze_code_node`.
+  - `graph.py`: Constructs and compiles the `StateGraph` with a `MemorySaver` checkpointer, defining the multi-agent execution pipeline and Human-in-the-Loop (HITL) breakpoints.
+  - `nodes.py`: Houses the core logic and agent definitions (`analyze_code_node`, `refactor_code_node`), alongside the robust `clean_think_tag` Regex parser.
+  - `prompts.py`: Isolates system prompts for the Critic and Coder agents, enforcing a strict separation of concerns for maintainability.
   - `tools.py`: Integrates native `subprocess` execution for physical system tools (`flake8` for syntax styling and `bandit` for AST-based security scanning).
 - `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
 - `frontend/`: The React and Vite client application. Features a modular, component-based architecture. Includes a multi-stage Dockerfile for Nginx deployment.
@@ -31,6 +32,9 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Live Markdown & Syntax Highlighting**: Intercepts the LLM's raw markdown output and securely renders it into formatted HTML using `react-markdown`, applying a native VS Code dark theme to code blocks and snippets via `react-syntax-highlighter`.
 - **Client-Side Export**: Incorporates seamless, memory-efficient browser-based downloading. Users can export the generated analysis directly to their local machine as a formatted `.md` file using the native JavaScript Blob API.
 - **Production-Ready Infrastructure**: Fully containerized using Docker and Docker Compose with multi-stage builds, separating the backend (Uvicorn) and frontend (Nginx) services.
+- **Multi-Agent Architecture**: Upgraded from a single LLM pipeline to a dual-agent system containing a "Critic" (analyzes code and generates diagnostic reports) and a "Coder/Refactorer" (generates fixed, production-ready code based strictly on the Critic's feedback).
+- **Human-in-the-Loop (HITL)**: Integrates LangGraph's `MemorySaver` to persist thread state in memory. The workflow intentionally pauses (`interrupt_before`) after the initial review, awaiting explicit user approval before triggering the refactoring agent.
+- **Side-by-Side Code Comparison**: Features an advanced split-pane React UI utilizing CSS Grid to visually compare the original code alongside the AI-generated refactored solution, complete with syntax highlighting and localized `.py` exports.
 
 ## Running the Application
 

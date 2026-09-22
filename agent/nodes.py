@@ -5,6 +5,7 @@ from typing import TypedDict, Optional
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from agent.tools import run_linter, run_security_scanner
+from agent.prompts import get_review_prompt, get_refactor_prompt
 
 class ReviewState(TypedDict):
     file_path: str
@@ -13,6 +14,7 @@ class ReviewState(TypedDict):
     security_output: Optional[str]
     review_output: Optional[str]
     report_path: Optional[str]
+    refactored_code: Optional[str]
 
 load_dotenv()
 
@@ -47,32 +49,13 @@ def execute_tools_node(state: ReviewState) -> dict:
     }
 
 def analyze_code_node(state: ReviewState) -> dict:
-    prompt = f"""You are a Senior Code Reviewer. Be highly concise and direct.
-Analyze the following code alongside its physical execution metrics.
-Generate a brief response structured strictly into:
-- **Bugs or Security Vulnerabilities**
-- **Performance Optimizations**
-- **Readability and Cleanliness**
-
-CRITICAL INSTRUCTIONS: 
-Keep your internal reasoning as short as possible. Output ONLY the requested sections with brief bullet points.
-Use the provided Linter (flake8) and Security (bandit) outputs as factual grounding.
-
-Code to review ({state['file_path']}):
----
-{state['code_content']}
----
-
-Physical Linter Output (flake8):
----
-{state.get('linter_output', 'No linter data available.')}
----
-
-Physical Security Scanner Output (bandit):
----
-{state.get('security_output', 'No security data available.')}
----
-"""
+    prompt = get_review_prompt(
+        file_path=state['file_path'],
+        code_content=state['code_content'],
+        linter_output=state.get('linter_output', 'No linter data available.'),
+        security_output=state.get('security_output', 'No security data available.')
+    )
+    
     response = llm.invoke(prompt)
     clean_response = clean_think_tag(response.content)
     
@@ -98,3 +81,16 @@ def save_report_node(state: ReviewState) -> dict:
         f.write(state.get("review_output", "No output generated."))
         
     return {"report_path": report_path}
+
+def refactor_code_node(state: ReviewState) -> dict:
+    """Generates refactored code based on the original code and the AI review."""
+    prompt = get_refactor_prompt(
+        code_content=state['code_content'],
+        review_output=state['review_output']
+    )
+    
+    response = llm.invoke(prompt)
+    clean_code = response.content.replace("```python", "").replace("```", "").strip()
+    clean_code = clean_think_tag(clean_code)
+    
+    return {"refactored_code": clean_code}

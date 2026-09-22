@@ -2,6 +2,7 @@ import { useState } from 'react'
 import FileUploadZone from './components/FileUploadZone'
 import ReportViewer from './components/ReportViewer'
 import DownloadButton from './components/DownloadButton'
+import RefactorSection from './components/RefactorSection'
 import './App.css'
 
 function App() {
@@ -71,6 +72,15 @@ function App() {
           <ReportViewer reviewText={result.review} />
           
           <DownloadButton result={result} />
+
+          {result.thread_id && (
+            <RefactorSection 
+              threadId={result.thread_id} 
+              originalFileName={result.file_analyzed}
+              originalCode={result.original_code}
+              setError={setError}
+            />
+          )}
         </div>
       )}
     </div>
