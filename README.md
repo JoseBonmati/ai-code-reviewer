@@ -15,6 +15,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
 - `frontend/`: The React and Vite client application. Features a modular, component-based architecture. Includes a multi-stage Dockerfile for Nginx deployment.
 - `reports/`: Automatically generated directory where the system saves timestamped Markdown (`.md`) review reports.
+- `tests/`: Automated test suite utilizing `pytest` and `httpx` to validate FastAPI endpoints, LangGraph state memory management, and the regex-based CoT output parsers.
 - `.env.example`: Configuration file isolating API keys, endpoints, and model selection from the source code.
 - `requirements.txt`: Defines project dependencies including orchestration frameworks and physical static analyzers.
 - `Dockerfile` & `docker-compose.yaml`: Infrastructure files to containerize the agent environment.
@@ -36,6 +37,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Human-in-the-Loop (HITL)**: Integrates LangGraph's `MemorySaver` to persist thread state in memory. The workflow intentionally pauses (`interrupt_before`) after the initial review, awaiting explicit user approval before triggering the refactoring agent.
 - **Side-by-Side Code Comparison**: Features an advanced split-pane React UI utilizing CSS Grid to visually compare the original code alongside the AI-generated refactored solution, complete with syntax highlighting and localized `.py` exports.
 - **Enterprise Observability (OpenTelemetry)**: Integrated Arize Phoenix via `openinference` to provide real-time tracing of the LangGraph execution. Captures full agent lifecycles, LLM prompt construction, token consumption, and node latency metrics out-of-the-box without intruding on core business logic.
+- **Automated Testing Suite**: Includes comprehensive tests built with `pytest` and `httpx` validating API endpoints, session management (`thread_id`), and robust LLM formatting parsers (`clean_think_tag`) using mock fixtures to prevent token consumption.
 
 ## Running the Application
 
@@ -54,3 +56,11 @@ The AI Code Reviewer is fully containerized. To launch the system:
    - **Web Interface (React)**: http://localhost:3000
    - **API Documentation (Swagger)**: http://localhost:8000/docs
    - **Telemetry Dashboard (Phoenix)**: http://localhost:6006
+
+## Testing
+
+The project includes an automated test suite. To run the tests within the isolated backend container without consuming LLM tokens:
+
+   ```bash
+   docker compose exec backend pytest
+   ```

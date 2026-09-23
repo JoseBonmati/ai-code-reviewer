@@ -18,3 +18,7 @@ python-multipart
 # Telemetry & Observability
 arize-phoenix
 openinference-instrumentation-langchain
+
+# Testing
+pytest
+httpx
