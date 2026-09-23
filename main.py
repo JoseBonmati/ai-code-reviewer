@@ -5,9 +5,20 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+from phoenix.otel import register
+from openinference.instrumentation.langchain import LangChainInstrumentor
+
+# Initialize Phoenix before loading the LangGraph components
+tracer_provider = register(
+    project_name="multi-agent-reviewer",
+    endpoint=os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://127.0.0.1:6006") + "/v1/traces"
+)
+LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
+
 from agent.graph import graph
 
-app = FastAPI(title="AI Code Reviewer API", version="4.0")
+app = FastAPI(title="AI Code Reviewer API", version="5.0")
 
 # Allow requests from the React frontend
 app.add_middleware(

@@ -14,3 +14,7 @@ bandit
 fastapi
 uvicorn
 python-multipart
+
+# Telemetry & Observability
+arize-phoenix
+openinference-instrumentation-langchain

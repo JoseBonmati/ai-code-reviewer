@@ -11,6 +11,11 @@ services:
     env_file:
       # Loads your LLM API keys into the container
       - .env
+    environment:
+      # Directs traces to the local Phoenix container
+      - PHOENIX_COLLECTOR_ENDPOINT=http://phoenix:6006
+    depends_on:
+      - phoenix
     restart: unless-stopped
 
   frontend:
@@ -23,4 +28,12 @@ services:
     depends_on:
       # Ensures the API starts before the web interface
       - backend
+    restart: unless-stopped
+
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    container_name: arize_phoenix
+    ports:
+      - "6006:6006" # UI and API
+      - "4317:4317" # OTLP gRPC receiver
     restart: unless-stopped

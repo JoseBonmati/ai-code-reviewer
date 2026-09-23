@@ -35,6 +35,7 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **Multi-Agent Architecture**: Upgraded from a single LLM pipeline to a dual-agent system containing a "Critic" (analyzes code and generates diagnostic reports) and a "Coder/Refactorer" (generates fixed, production-ready code based strictly on the Critic's feedback).
 - **Human-in-the-Loop (HITL)**: Integrates LangGraph's `MemorySaver` to persist thread state in memory. The workflow intentionally pauses (`interrupt_before`) after the initial review, awaiting explicit user approval before triggering the refactoring agent.
 - **Side-by-Side Code Comparison**: Features an advanced split-pane React UI utilizing CSS Grid to visually compare the original code alongside the AI-generated refactored solution, complete with syntax highlighting and localized `.py` exports.
+- **Enterprise Observability (OpenTelemetry)**: Integrated Arize Phoenix via `openinference` to provide real-time tracing of the LangGraph execution. Captures full agent lifecycles, LLM prompt construction, token consumption, and node latency metrics out-of-the-box without intruding on core business logic.
 
 ## Running the Application
 
@@ -50,5 +51,6 @@ The AI Code Reviewer is fully containerized. To launch the system:
    docker compose up --build
    ```
 4. Access the application:
-   Web Interface: http://localhost:3000
-   API Documentation (Swagger): http://localhost:8000/docs
+   - **Web Interface (React)**: http://localhost:3000
+   - **API Documentation (Swagger)**: http://localhost:8000/docs
+   - **Telemetry Dashboard (Phoenix)**: http://localhost:6006
