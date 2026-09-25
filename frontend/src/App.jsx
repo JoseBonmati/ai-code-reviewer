@@ -66,7 +66,6 @@ function App() {
         <div className="report-container">
           <h2 className="report-title">Generated Report</h2>
           <p><strong>File:</strong> {result.file_analyzed}</p>
-          <p><strong>Report path:</strong> {result.report_path}</p>
           <hr />
           
           <ReportViewer reviewText={result.review} />

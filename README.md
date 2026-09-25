@@ -6,15 +6,15 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 
 ## Project Structure
 
-- `main.py`: The FastAPI application entry point. Exposes the `/api/review` and `/api/refactor` endpoints, managing unique `thread_id` sessions for asynchronous agent execution.
+- `main.py`: The FastAPI application entry point. Exposes the `/api/review` and `/api/refactor` endpoints, managing unique `thread_id` sessions for asynchronous agent execution, and utilizes `BackgroundTasks` for ephemeral file cleanup.
 - `agent/`: Contains the core LangGraph architecture and LLM interactions.
   - `graph.py`: Constructs and compiles the `StateGraph` with a `MemorySaver` checkpointer, defining the multi-agent execution pipeline and Human-in-the-Loop (HITL) breakpoints.
   - `nodes.py`: Houses the core logic and agent definitions (`analyze_code_node`, `refactor_code_node`), alongside the robust `clean_think_tag` Regex parser.
-  - `prompts.py`: Isolates system prompts for the Critic and Coder agents, enforcing a strict separation of concerns for maintainability.
+  - `prompts.py`: Isolates system prompts for the Critic and Coder agents, enforcing a strict separation of concerns and preventing CoT leakage into code output.
   - `tools.py`: Integrates native `subprocess` execution for physical system tools (`flake8` for syntax styling and `bandit` for AST-based security scanning).
-- `data/`: The target directory for storing source code files pending review (e.g., `sample.py`).
+- `data/`: Ephemeral directory for temporary file storage during physical AST scanning. Files are instantly purged via FastAPI background tasks post-analysis.
+- `example_files/`: A curated suite of edge-case test files (e.g., prompt injections, fatal syntax errors, legacy code) to validate the agent's fault tolerance and accuracy.
 - `frontend/`: The React and Vite client application. Features a modular, component-based architecture. Includes a multi-stage Dockerfile for Nginx deployment.
-- `reports/`: Automatically generated directory where the system saves timestamped Markdown (`.md`) review reports.
 - `tests/`: Automated test suite utilizing `pytest` and `httpx` to validate FastAPI endpoints, LangGraph state memory management, and the regex-based CoT output parsers.
 - `.env.example`: Configuration file isolating API keys, endpoints, and model selection from the source code.
 - `requirements.txt`: Defines project dependencies including orchestration frameworks and physical static analyzers.
@@ -27,8 +27,8 @@ The architecture is intentionally agnostic, allowing developers to seamlessly sw
 - **LangGraph Orchestration**: Utilizes a highly scalable `StateGraph` dictionary (`ReviewState`) to manage code context and AI outputs, ensuring the workflow can easily expand into a complex multi-agent system.
 - **Dual Validation Architecture**: Elevates the review process from passive LLM inference to active system validation. The workflow executes physical static analysis tools (`flake8`, `bandit`) in the background, intercepting OS-level terminal errors (e.g., syntax violations, SQL injections) and injecting them into the LLM's prompt for factual, hallucination-free grounding.
 - **Focused Diagnostic Categories**: The system prompt strictly forces the LLM to categorize its feedback into three distinct, actionable sections: Bugs/Security Vulnerabilities, Performance Optimizations, and Readability/Cleanliness.
-- **Secure Backend Directory Scanning**: The orchestrator is strictly locked to scan the `data/` directory. This secure constraint prepares the architecture for seamless frontend integration, ensuring only safely uploaded files are processed in batch.
-- **Automated Markdown Export**: The LangGraph pipeline features a dedicated final node that automatically captures the LLM's structured feedback and exports it as a timestamped Markdown file in the `reports/` directory for seamless documentation and PR integration.
+- **Stateless & Ephemeral Architecture**: The backend operates with zero technical debt or file accumulation. Uploaded code is stored temporarily in the `data/` directory just long enough for physical AST tools (Flake8, Bandit) to scan it, and is instantly destroyed via FastAPI `BackgroundTasks` once loaded into the LangGraph memory.
+- **Client-Side Markdown Export**: The system bypasses physical file creation on the server. The LLM's structured feedback is passed directly to the frontend, where it is securely rendered and can be exported as a formatted `.md` file directly to the user's local machine using the native JavaScript Blob API.
 - **Full-Stack Interface**: A responsive, dark-themed React web client featuring an interactive Drag & Drop upload zone. Built with a modular component architecture following strict React best practices (Single Responsibility Principle).
 - **Live Markdown & Syntax Highlighting**: Intercepts the LLM's raw markdown output and securely renders it into formatted HTML using `react-markdown`, applying a native VS Code dark theme to code blocks and snippets via `react-syntax-highlighter`.
 - **Client-Side Export**: Incorporates seamless, memory-efficient browser-based downloading. Users can export the generated analysis directly to their local machine as a formatted `.md` file using the native JavaScript Blob API.

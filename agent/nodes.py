@@ -13,7 +13,6 @@ class ReviewState(TypedDict):
     linter_output: Optional[str]
     security_output: Optional[str]
     review_output: Optional[str]
-    report_path: Optional[str]
     refactored_code: Optional[str]
 
 load_dotenv()
@@ -60,27 +59,6 @@ def analyze_code_node(state: ReviewState) -> dict:
     clean_response = clean_think_tag(response.content)
     
     return {"review_output": clean_response}
-
-def save_report_node(state: ReviewState) -> dict:
-    """Saves the generated AI review output to a Markdown file."""
-    reports_dir = "reports"
-    os.makedirs(reports_dir, exist_ok=True)
-    
-    # Extract base file name and create a timestamp
-    base_name = os.path.basename(state["file_path"])
-    file_name_without_ext = os.path.splitext(base_name)[0]
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Construct the final markdown path
-    report_filename = f"review_{file_name_without_ext}_{timestamp}.md"
-    report_path = os.path.join(reports_dir, report_filename)
-    
-    # Write the review string directly into the file
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write(f"# Code Review Report for `{base_name}`\n\n")
-        f.write(state.get("review_output", "No output generated."))
-        
-    return {"report_path": report_path}
 
 def refactor_code_node(state: ReviewState) -> dict:
     """Generates refactored code based on the original code and the AI review."""

@@ -2,7 +2,7 @@ import os
 import shutil
 import uuid
 import uvicorn
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -36,7 +36,7 @@ class RefactorRequest(BaseModel):
     thread_id: str
 
 @app.post("/api/review")
-async def review_code(file: UploadFile = File(...)):
+async def review_code(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
     if not file.filename.endswith(".py"):
         raise HTTPException(status_code=400, detail="Only .py files are supported.")
     
@@ -64,7 +64,6 @@ async def review_code(file: UploadFile = File(...)):
         "linter_output": None,
         "security_output": None,
         "review_output": None,
-        "report_path": None,
         "refactored_code": None
     }
     
@@ -75,10 +74,13 @@ async def review_code(file: UploadFile = File(...)):
     try:
         # Pass the config. The graph will pause after saving the report.
         result = graph.invoke(initial_state, config)
+        
+        if os.path.exists(file_path):
+            background_tasks.add_task(os.remove, file_path)
+            
         return {
             "status": "success",
             "file_analyzed": file.filename,
-            "report_path": result.get("report_path"),
             "review": result.get("review_output", "No review generated."),
             "original_code": code_content,
             "thread_id": thread_id

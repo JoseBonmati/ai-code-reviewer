@@ -5,11 +5,7 @@ services:
     container_name: ai_code_reviewer_backend
     ports:
       - "8000:8000"
-    volumes:
-      # Persists the uploaded files and generated Markdown reports
-      - ./data:/app/data
     env_file:
-      # Loads your LLM API keys into the container
       - .env
     environment:
       # Directs traces to the local Phoenix container

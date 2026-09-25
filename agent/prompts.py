@@ -35,6 +35,11 @@ CRITICAL INSTRUCTIONS:
 Output ONLY the raw Python code. Do not include markdown formatting like ```python.
 Do not include any explanations.
 
+CRITICAL COMMENTING RULES:
+- DO NOT output your internal reasoning, decision-making process, or monologues as Python comments.
+- Code comments must be STRICTLY limited to standard professional docstrings and essential technical explanations.
+- Never use conversational phrases like "Let's assume", "Actually", "For the purpose of this refactor", or "I will use". Write confident, production-ready code.
+
 Original Code:
 ---
 {code_content}
